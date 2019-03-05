@@ -1,7 +1,7 @@
 # Advanced Lane Detection
-
+![annotated](output_images/annotated_test2.png)
 ## Overview
-Detect lanes using computer vision techniques. 
+Detect lanes using computer vision techniques. This project is part of the [Udacity Self-Driving Car Nanodegree](https://www.udacity.com/drive), and much of the code is leveraged from the lecture notes.
 
 The following steps were performed for lane detection:
 
@@ -13,6 +13,8 @@ The following steps were performed for lane detection:
 * Determine the curvature of the lane and vehicle position with respect to center.
 * Warp the detected lane boundaries back onto the original image.
 * Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+
+[Here](https://youtu.be/lSd_WY1bqLw) is the final video output on Youtube. The same video is 'out.mp4' in this repo. The original video is 'project_video.mp4'.
 
 ## Dependencies
 * Python 3.5
@@ -34,13 +36,23 @@ The camera was calibrated using the chessboard images in 'camera_cal/*.jpg'. The
 
 After the above steps were executed for all calibration images, I used OpenCV's `calibrateCamera()` function to calculate the distortion matrices. Using the distortion matrices, I undistort images using OpenCV's `undistort()` function.
 
+To illustrate, the following is the calibration image 'camera_cal/calibration5.jpg':
+![calibration5](camera_cal/calibration5.jpg)
+
+Here is the same image undistored via camera calibration:
+![undist_cal5](output_images/undistort_calibration.png)
+
 The final calibration matrices are saved in the pickle file 'calibrate_camera.p'
 
 ## Lane detection pipeline
 The following describes and illustrates the steps involved in the lane detection pipeline. For illustration, below is the original image we will use as an example:
 
+![orig](test_images/test2.jpg)
+
 ### Undistort image
 Using the camera calibration matrices in 'calibrate_camera.p', I undistort the input image. Below is the example image above, undistorted:
+
+![undist](output_images/undistort_test2.png)
 
 The code to perform camera calibration is in 'calibrate_camera.py'. For all images in 'test_images/\*.jpg', the undistorted version of that image is saved in 'output_images/undistort_\*.png'.
 
@@ -56,6 +68,8 @@ The next step is to create a thresholded binary image, taking the undistorted im
 
 Here is the example image, transformed into a binary image by combining the above thresholded binary filters:
 
+![binary](output_images/binary_test2.png)
+
 The code to generate the thresholded binary image is in 'combined_thresh.py', in particular the function `combined_thresh()`. For all images in 'test_images/\*.jpg', the thresholded binary version of that image is saved in 'output_images/binary_\*.png'.
 
 ### Perspective transform
@@ -64,6 +78,8 @@ Given the thresholded binary image, the next step is to perform a perspective tr
 To accomplish the perspective transform, I use OpenCV's `getPerspectiveTransform()` and `warpPerspective()` functions. I hard-code the source and destination points for the perspective transform. The source and destination points were visually determined by manual inspection, although an important enhancement would be to algorithmically determine these points.
 
 Here is the example image, after applying perspective transform:
+
+![warped](output_images/warped_test2.png)
 
 The code to perform perspective transform is in 'perspective_transform.py', in particular the function `perspective_transform()`. For all images in 'test_images/\*.jpg', the warped version of that image (i.e. post-perspective-transform) is saved in 'output_images/warped_\*.png'.
 
@@ -85,6 +101,8 @@ Given the polynomial fit calculated from the previous video frame, one performan
 Another enhancement to exploit the temporal correlation is to smooth-out the polynomial fit parameters. The benefit to doing so would be to make the detector more robust to noisy input. I used a simple moving average of the polynomial coefficients (3 values per lane line) for the most recent 5 video frames. The code to perform this smoothing is in the function `add_fit()` of the class `Line` in the file 'Line.py'. The `Line` class was used as a helper for this smoothing function specifically, and `Line` instances are global objects in 'line_fit.py'.
 
 Below is an illustration of the output of the polynomial fit, for our original example image. For all images in 'test_images/\*.jpg', the polynomial-fit-annotated version of that image is saved in 'output_images/polyfit_\*.png'.
+
+![polyfit](output_images/polyfit_test2.png)
 
 ### Radius of curvature
 Given the polynomial fit for the left and right lane lines, I calculated the radius of curvature for each line according to formulas presented [here](http://www.intmath.com/applications-differentiation/8-radius-curvature.php). I also converted the distance units from pixels to meters, assuming 30 meters per 720 pixels in the vertical direction, and 3.7 meters per 700 pixels in the horizontal direction.
@@ -113,5 +131,7 @@ The code to perform the above is in the function `final_viz()` in 'line_fit.py'.
 
 Below is the final annotated version of our original image. For all images in 'test_images/\*.jpg', the final annotated version of that image is saved in 'output_images/annotated_\*.png'.
 
+![annotated](output_images/annotated_test2.png)
+
 ## Discussion
-This is an initial version of advanced computer-vision-based lane finding. There are multiple scenarios where this lane finder would not work. For example, the roads with cracks which could be mistaken as lane lines (see 'challenge_video.mp4'). Also, it is possible that other vehicles in front would trick the lane finder into thinking it was part of the lane. More work can be done to make the lane detector more robust, e.g. [deep-learning-based semantic segmentation](https://arxiv.org/pdf/1605.06211.pdf) to find pixels that are likely to be lane markers (then performing polyfit on only those pixels).
+This is an initial version of advanced computer-vision-based lane finding. There are multiple scenarios where this lane finder would not work. For example, the Udacity challenge video includes roads with cracks which could be mistaken as lane lines (see 'challenge_video.mp4'). Also, it is possible that other vehicles in front would trick the lane finder into thinking it was part of the lane. More work can be done to make the lane detector more robust, e.g. [deep-learning-based semantic segmentation](https://arxiv.org/pdf/1605.06211.pdf) to find pixels that are likely to be lane markers (then performing polyfit on only those pixels).
